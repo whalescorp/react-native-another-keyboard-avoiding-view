@@ -6,7 +6,9 @@ import { AnotherKeyboardAvoidingViewView } from 'react-native-another-keyboard-a
 export default function App() {
   return (
     <View style={styles.container}>
-      <AnotherKeyboardAvoidingViewView color="#32a852" style={styles.box} />
+      <AnotherKeyboardAvoidingViewView>
+        <View />
+      </AnotherKeyboardAvoidingViewView>
     </View>
   );
 }
