@@ -1,2 +1,2 @@
-export { default as AnotherKeyboardAvoidingViewView } from './AnotherKeyboardAvoidingViewViewNativeComponent';
-export * from './AnotherKeyboardAvoidingViewViewNativeComponent';
+export { default as AnotherKeyboardAvoidingView } from './AnotherKeyboardAvoidingViewNativeComponent';
+export * from './AnotherKeyboardAvoidingViewNativeComponent';

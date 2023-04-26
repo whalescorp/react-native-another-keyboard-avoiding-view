@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5E555C0D2413F4C50049A1A2 /* AnotherKeyboardAvoidingView.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* AnotherKeyboardAvoidingView.m */; };
+		F07046FD29F97BAA00F5CA09 /* AnotherKeyboardAvoidingView.mm in Sources */ = {isa = PBXBuildFile; fileRef = F07046FA29F97B4200F5CA09 /* AnotherKeyboardAvoidingView.mm */; };
+		F07046FE29F97BAE00F5CA09 /* AnotherKeyboardAvoidingViewManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = F07046F929F97B4200F5CA09 /* AnotherKeyboardAvoidingViewManager.mm */; };
+		F07046FF29F97BB200F5CA09 /* _AnotherKeyboardAvoidingView.m in Sources */ = {isa = PBXBuildFile; fileRef = F07046FC29F97B4200F5CA09 /* _AnotherKeyboardAvoidingView.m */; };
+		F070470629F9882500F5CA09 /* WKWebView+AnotherKeyboardAvoidingView.m in Sources */ = {isa = PBXBuildFile; fileRef = F070470529F9882500F5CA09 /* WKWebView+AnotherKeyboardAvoidingView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,7 +28,12 @@
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libAnotherKeyboardAvoidingView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libAnotherKeyboardAvoidingView.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3E7B5881CC2AC0600A0062D /* AnotherKeyboardAvoidingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnotherKeyboardAvoidingView.h; sourceTree = "<group>"; };
-		B3E7B5891CC2AC0600A0062D /* AnotherKeyboardAvoidingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnotherKeyboardAvoidingView.m; sourceTree = "<group>"; };
+		F07046F929F97B4200F5CA09 /* AnotherKeyboardAvoidingViewManager.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AnotherKeyboardAvoidingViewManager.mm; sourceTree = "<group>"; };
+		F07046FA29F97B4200F5CA09 /* AnotherKeyboardAvoidingView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AnotherKeyboardAvoidingView.mm; sourceTree = "<group>"; };
+		F07046FB29F97B4200F5CA09 /* _AnotherKeyboardAvoidingView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = _AnotherKeyboardAvoidingView.h; sourceTree = "<group>"; };
+		F07046FC29F97B4200F5CA09 /* _AnotherKeyboardAvoidingView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = _AnotherKeyboardAvoidingView.m; sourceTree = "<group>"; };
+		F070470429F9882500F5CA09 /* WKWebView+AnotherKeyboardAvoidingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "WKWebView+AnotherKeyboardAvoidingView.h"; sourceTree = "<group>"; };
+		F070470529F9882500F5CA09 /* WKWebView+AnotherKeyboardAvoidingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "WKWebView+AnotherKeyboardAvoidingView.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,8 +58,13 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				F07046F929F97B4200F5CA09 /* AnotherKeyboardAvoidingViewManager.mm */,
 				B3E7B5881CC2AC0600A0062D /* AnotherKeyboardAvoidingView.h */,
-				B3E7B5891CC2AC0600A0062D /* AnotherKeyboardAvoidingView.m */,
+				F07046FA29F97B4200F5CA09 /* AnotherKeyboardAvoidingView.mm */,
+				F07046FB29F97B4200F5CA09 /* _AnotherKeyboardAvoidingView.h */,
+				F07046FC29F97B4200F5CA09 /* _AnotherKeyboardAvoidingView.m */,
+				F070470429F9882500F5CA09 /* WKWebView+AnotherKeyboardAvoidingView.h */,
+				F070470529F9882500F5CA09 /* WKWebView+AnotherKeyboardAvoidingView.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -113,7 +126,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B3E7B58A1CC2AC0600A0062D /* AnotherKeyboardAvoidingView.m in Sources */,
+				F07046FE29F97BAE00F5CA09 /* AnotherKeyboardAvoidingViewManager.mm in Sources */,
+				F07046FF29F97BB200F5CA09 /* _AnotherKeyboardAvoidingView.m in Sources */,
+				F070470629F9882500F5CA09 /* WKWebView+AnotherKeyboardAvoidingView.m in Sources */,
+				F07046FD29F97BAA00F5CA09 /* AnotherKeyboardAvoidingView.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
