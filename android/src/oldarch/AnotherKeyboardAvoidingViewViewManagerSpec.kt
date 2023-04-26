@@ -1,9 +1,9 @@
 package com.anotherkeyboardavoidingview
 
-import android.view.View
+import android.view.ViewGroup
 import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.uimanager.SimpleViewManager
+import com.facebook.react.uimanager.ViewGroupManager
 
-abstract class AnotherKeyboardAvoidingViewViewManagerSpec<T : View> : SimpleViewManager<T>() {
+abstract class AnotherKeyboardAvoidingViewViewManagerSpec<T : ViewGroup> : ViewGroupManager<T>() {
   abstract fun setColor(view: T?, value: String?)
 }

@@ -1,15 +1,15 @@
 package com.anotherkeyboardavoidingview
 
-import android.view.View
+import android.view.ViewGroup
 
 import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.uimanager.SimpleViewManager
+import com.facebook.react.uimanager.ViewGroupManager
 import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.viewmanagers.AnotherKeyboardAvoidingViewViewManagerDelegate
 import com.facebook.react.viewmanagers.AnotherKeyboardAvoidingViewViewManagerInterface
 import com.facebook.soloader.SoLoader
 
-abstract class AnotherKeyboardAvoidingViewViewManagerSpec<T : View> : SimpleViewManager<T>(), AnotherKeyboardAvoidingViewViewManagerInterface<T> {
+abstract class AnotherKeyboardAvoidingViewViewManagerSpec<T : ViewGroup> : ViewGroupManager<T>(), AnotherKeyboardAvoidingViewViewManagerInterface<T> {
   private val mDelegate: ViewManagerDelegate<T>
 
   init {
