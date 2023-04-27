@@ -10,6 +10,73 @@
 #endif
 
 #import "_AnotherKeyboardAvoidingView.h"
+#import <objc/runtime.h>
+
+//
+// UIScrollView (_AnotherKeyboardAvoidingView)
+//
+
+@interface UIScrollView (_AnotherKeyboardAvoidingView)
+
+@property (nonatomic, assign, setter=akav_setContentOffsetBlocked:) BOOL akav_isContentOffsetBlocked;
+
+@end
+
+@implementation UIScrollView (_AnotherKeyboardAvoidingView)
+
++ (void)load {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        Class klass = [self class];
+
+        SEL osel = @selector(setBounds:);
+        SEL ssel = @selector(akav_setBounds:);
+
+        Method om = class_getInstanceMethod(klass, osel);
+        Method sm = class_getInstanceMethod(klass, ssel);
+
+        IMP oimp = method_getImplementation(om);
+        IMP simp = method_getImplementation(sm);
+
+        class_replaceMethod(klass,
+                            ssel,
+                            oimp,
+                            method_getTypeEncoding(om));
+        
+        class_replaceMethod(klass,
+                            osel,
+                            simp,
+                            method_getTypeEncoding(sm));
+    });
+}
+
+- (void)akav_setBounds:(CGRect)bounds {
+    CGRect _bounds = bounds;
+    if ([self akav_isContentOffsetBlocked]) {
+        _bounds.origin = [self bounds].origin;
+    }
+    [self akav_setBounds:_bounds];
+}
+
+#pragma mark - Setters & Getters
+
+- (BOOL)akav_isContentOffsetBlocked {
+    NSNumber *number = objc_getAssociatedObject(self, _cmd);
+    return number == nil ? NO : [number boolValue];
+}
+
+- (void)akav_setContentOffsetBlocked:(BOOL)akav_isContentOffsetBlocked {
+    objc_setAssociatedObject(self,
+                             @selector(akav_isContentOffsetBlocked),
+                             @(akav_isContentOffsetBlocked),
+                             OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+@end
+
+//
+// UIEdgeInsetsEqualToEdgeInsetsWithThreshold
+//
 
 BOOL UIEdgeInsetsEqualToEdgeInsetsWithThreshold(UIEdgeInsets lhs, UIEdgeInsets rhs, CGFloat threshold) {
     return
@@ -130,8 +197,13 @@ BOOL UIEdgeInsetsEqualToEdgeInsetsWithThreshold(UIEdgeInsets lhs, UIEdgeInsets r
         return;
     }
     
+    UIScrollView *nestedScrollView = [self _nestedWKWebViewScrollView];
+    nestedScrollView.akav_isContentOffsetBlocked = YES;
+    
     [UIView animateWithDuration:0.21 animations:^{
         [self layoutSubviewsDependingCurrentKeyboardHeight];
+    } completion:^(BOOL finished) {
+        nestedScrollView.akav_isContentOffsetBlocked = NO;
     }];
 }
 
@@ -151,11 +223,16 @@ BOOL UIEdgeInsetsEqualToEdgeInsetsWithThreshold(UIEdgeInsets lhs, UIEdgeInsets r
     options |= UIViewAnimationOptionBeginFromCurrentState;
     options |= UIViewAnimationOptionLayoutSubviews;
     
+    UIScrollView *nestedScrollView = [self _nestedWKWebViewScrollView];
+    nestedScrollView.akav_isContentOffsetBlocked = YES;
+    
     [UIView animateWithDuration:duration
                           delay:0
                         options:options
                      animations:animations
-                     completion:nil];
+                     completion:^(BOOL finished __unused) {
+        nestedScrollView.akav_isContentOffsetBlocked = NO;
+    }];
 }
 
 #pragma mark - Observers
@@ -172,6 +249,35 @@ BOOL UIEdgeInsetsEqualToEdgeInsetsWithThreshold(UIEdgeInsets lhs, UIEdgeInsets r
 
 - (void)UIKeyboardWillHideNotification:(NSNotification *)notification {
     [self updateCurrentKeyboardFrame:CGRectZero notifiction:notification];
+}
+
+#pragma mark - Helpers
+
+- (UIScrollView * _Nullable)_nestedWKWebViewScrollView {
+    __block UIScrollView *scrollView = nil;
+    __auto_type extract = ^UIScrollView * (UIView *obj) {
+        // RNCWebView -> RCNWebViewImpl -> WKWebView
+        UIView *view = [[[[obj subviews] firstObject] subviews] firstObject];
+        if ([view isKindOfClass:NSClassFromString(@"WKWebView")]) {
+            return (UIScrollView *)[[view subviews] firstObject];
+        }
+        return nil;
+    };
+    
+    [self.subviews enumerateObjectsUsingBlock:^(UIView *obj, NSUInteger idx, BOOL *stop) {
+        if ([NSStringFromClass([obj class]) containsString:@"WebView"]) {
+            scrollView = extract(obj);
+            *stop = YES;
+        } else {
+            UIView *subview = [[obj subviews] firstObject];
+            if ([NSStringFromClass([subview class]) containsString:@"WebView"]) {
+                scrollView = extract(subview);
+                *stop = YES;
+            }
+        }
+    }];
+    
+    return scrollView;
 }
 
 @end
