@@ -3,15 +3,15 @@
 #import <React/RCTViewComponentView.h>
 #import <UIKit/UIKit.h>
 
-#ifndef AnotherKeyboardAvoidingViewViewNativeComponent_h
-#define AnotherKeyboardAvoidingViewViewNativeComponent_h
+#ifndef AnotherKeyboardAvoidingViewNativeComponent_h
+#define AnotherKeyboardAvoidingViewNativeComponent_h
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AnotherKeyboardAvoidingViewView : RCTViewComponentView
+@interface AnotherKeyboardAvoidingView : RCTViewComponentView
 @end
 
 NS_ASSUME_NONNULL_END
 
-#endif /* AnotherKeyboardAvoidingViewViewNativeComponent_h */
+#endif /* AnotherKeyboardAvoidingViewNativeComponent_h */
 #endif /* RCT_NEW_ARCH_ENABLED */

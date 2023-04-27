@@ -11,11 +11,11 @@ npm install react-native-another-keyboard-avoiding-view
 ## Usage
 
 ```js
-import { AnotherKeyboardAvoidingViewView } from "react-native-another-keyboard-avoiding-view";
+import { AnotherKeyboardAvoidingView } from "react-native-another-keyboard-avoiding-view";
 
 // ...
 
-<AnotherKeyboardAvoidingViewView color="tomato" />
+<AnotherKeyboardAvoidingView color="tomato" />
 ```
 
 ## Contributing
