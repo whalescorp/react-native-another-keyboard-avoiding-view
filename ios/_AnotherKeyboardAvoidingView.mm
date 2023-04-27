@@ -100,7 +100,7 @@ BOOL UIEdgeInsetsEqualToEdgeInsetsWithThreshold(UIEdgeInsets lhs, UIEdgeInsets r
 - (void)layoutSubviewsDependingCurrentKeyboardHeight {
     self.keyboardHeightLayoutNeeded = NO;
     
-    CGRect rect = [self convertRect:(CGRect)[self frame] toView:self.window];
+    CGRect rect = [[self superview] convertRect:[self frame] toView:self.window];
     CGRect intersection = CGRectIntersection(self.currentKeyboardFrame, rect);
     
     CGFloat offset = CGRectGetHeight(intersection);
