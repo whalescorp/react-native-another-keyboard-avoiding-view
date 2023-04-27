@@ -6,7 +6,7 @@ namespace react {
 
 void registerProviders() {
     auto providerRegistry = CoreComponentsRegistry::sharedProviderRegistry();
-    providerRegistry->add(concreteComponentDescriptorProvider<AnotherKeyboardAvoidingViewViewComponentDescriptor>());
+    providerRegistry->add(concreteComponentDescriptorProvider<AnotherKeyboardAvoidingViewComponentDescriptor>());
 }
 
 }

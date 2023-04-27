@@ -5,15 +5,15 @@ import android.view.ViewGroup
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ViewGroupManager
 import com.facebook.react.uimanager.ViewManagerDelegate
-import com.facebook.react.viewmanagers.AnotherKeyboardAvoidingViewViewManagerDelegate
-import com.facebook.react.viewmanagers.AnotherKeyboardAvoidingViewViewManagerInterface
+import com.facebook.react.viewmanagers.AnotherKeyboardAvoidingViewManagerDelegate
+import com.facebook.react.viewmanagers.AnotherKeyboardAvoidingViewManagerInterface
 import com.facebook.soloader.SoLoader
 
-abstract class AnotherKeyboardAvoidingViewViewManagerSpec<T : ViewGroup> : ViewGroupManager<T>(), AnotherKeyboardAvoidingViewViewManagerInterface<T> {
+abstract class AnotherKeyboardAvoidingViewManagerSpec<T : ViewGroup> : ViewGroupManager<T>(), AnotherKeyboardAvoidingViewManagerInterface<T> {
   private val mDelegate: ViewManagerDelegate<T>
 
   init {
-    mDelegate = AnotherKeyboardAvoidingViewViewManagerDelegate(this)
+    mDelegate = AnotherKeyboardAvoidingViewManagerDelegate(this)
   }
 
   override fun getDelegate(): ViewManagerDelegate<T>? {
