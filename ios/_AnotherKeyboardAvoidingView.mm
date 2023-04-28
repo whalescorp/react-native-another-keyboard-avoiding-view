@@ -13,12 +13,44 @@
 #import <objc/runtime.h>
 
 //
+// isAnimationsDisabled
+//
+
+static BOOL isAnimationsDisabled() {
+    return [NSProcessInfo processInfo].isLowPowerModeEnabled;
+}
+
+//
+// swizzleUIScrollView
+//
+
+static void swizzleUIScrollView(SEL osel, SEL ssel) {
+    Class klass = [UIScrollView class];
+    
+    Method om = class_getInstanceMethod(klass, osel);
+    Method sm = class_getInstanceMethod(klass, ssel);
+
+    IMP oimp = method_getImplementation(om);
+    IMP simp = method_getImplementation(sm);
+
+    class_replaceMethod(klass,
+                        ssel,
+                        oimp,
+                        method_getTypeEncoding(om));
+    
+    class_replaceMethod(klass,
+                        osel,
+                        simp,
+                        method_getTypeEncoding(sm));
+}
+
+//
 // UIScrollView (_AnotherKeyboardAvoidingView)
 //
 
 @interface UIScrollView (_AnotherKeyboardAvoidingView)
 
-@property (nonatomic, assign, setter=akav_setContentOffsetBlocked:) BOOL akav_isContentOffsetBlocked;
+@property (nonatomic, assign, setter=akav_setKeyboardAdjustmentsBlocked:) BOOL akav_keyboardAdjustmentsBlocked;
 
 @end
 
@@ -27,48 +59,43 @@
 + (void)load {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        Class klass = [self class];
-
-        SEL osel = @selector(setBounds:);
-        SEL ssel = @selector(akav_setBounds:);
-
-        Method om = class_getInstanceMethod(klass, osel);
-        Method sm = class_getInstanceMethod(klass, ssel);
-
-        IMP oimp = method_getImplementation(om);
-        IMP simp = method_getImplementation(sm);
-
-        class_replaceMethod(klass,
-                            ssel,
-                            oimp,
-                            method_getTypeEncoding(om));
+        swizzleUIScrollView(@selector(setBounds:),
+                            @selector(akav_setBounds:));
         
-        class_replaceMethod(klass,
-                            osel,
-                            simp,
-                            method_getTypeEncoding(sm));
+        swizzleUIScrollView(NSSelectorFromString(@"_systemContentInset"),
+                            @selector(akav_systemContentInset));
     });
 }
 
 - (void)akav_setBounds:(CGRect)bounds {
     CGRect _bounds = bounds;
-    if ([self akav_isContentOffsetBlocked]) {
+    if ([self akav_keyboardAdjustmentsBlocked]) {
         _bounds.origin = [self bounds].origin;
     }
     [self akav_setBounds:_bounds];
 }
 
+// https://github.com/WebKit/WebKit/blob/3b9112ff64a6aa1c0daf62390d1646bcc36b488b/Source/WebKit/UIProcess/ios/WKScrollView.mm#L440
+- (UIEdgeInsets)akav_systemContentInset {
+    if ([self akav_keyboardAdjustmentsBlocked]) {
+        [self setValue:@(0.0) forKey:@"_keyboardBottomInsetAdjustment"];
+    }
+    
+    UIEdgeInsets _systemContentInset = [self akav_systemContentInset];
+    return _systemContentInset;
+}
+
 #pragma mark - Setters & Getters
 
-- (BOOL)akav_isContentOffsetBlocked {
+- (BOOL)akav_keyboardAdjustmentsBlocked {
     NSNumber *number = objc_getAssociatedObject(self, _cmd);
     return number == nil ? NO : [number boolValue];
 }
 
-- (void)akav_setContentOffsetBlocked:(BOOL)akav_isContentOffsetBlocked {
+- (void)akav_setKeyboardAdjustmentsBlocked:(BOOL)akav_keyboardAdjustmentsBlocked {
     objc_setAssociatedObject(self,
-                             @selector(akav_isContentOffsetBlocked),
-                             @(akav_isContentOffsetBlocked),
+                             @selector(akav_keyboardAdjustmentsBlocked),
+                             @(akav_keyboardAdjustmentsBlocked),
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
@@ -175,7 +202,9 @@ BOOL UIEdgeInsetsEqualToEdgeInsetsWithThreshold(UIEdgeInsets lhs, UIEdgeInsets r
 }
 
 - (void)_handleAnimationProgressWithKeyboardHeight:(CGFloat)keyboardHeight {
-    [self.delegate _anotherKeyboardAvoidingView:self requiresUpdateBottomInset:keyboardHeight];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.delegate _anotherKeyboardAvoidingView:self requiresUpdateBottomInset:keyboardHeight];
+    });
 }
 
 #pragma mark - Setters & Getters
@@ -197,14 +226,29 @@ BOOL UIEdgeInsetsEqualToEdgeInsetsWithThreshold(UIEdgeInsets lhs, UIEdgeInsets r
         return;
     }
     
-    UIScrollView *nestedScrollView = [self _nestedWKWebViewScrollView];
-    nestedScrollView.akav_isContentOffsetBlocked = YES;
-    
-    [UIView animateWithDuration:0.21 animations:^{
+    __auto_type animations = ^{
         [self layoutSubviewsDependingCurrentKeyboardHeight];
-    } completion:^(BOOL finished) {
-        nestedScrollView.akav_isContentOffsetBlocked = NO;
-    }];
+    };
+    
+    UIScrollView *nestedScrollView = [self _nestedWKWebViewScrollView];
+    nestedScrollView.akav_keyboardAdjustmentsBlocked = YES;
+    
+    __auto_type completion = ^{
+        nestedScrollView.akav_keyboardAdjustmentsBlocked = NO;
+    };
+    
+    if (isAnimationsDisabled()) {
+        [UIView performWithoutAnimation:animations];
+        dispatch_async(dispatch_get_main_queue(), completion);
+        return;
+    }
+    
+    NSTimeInterval duration = 0.21;
+    [UIView animateWithDuration:duration animations:animations completion:nil];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(duration * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(),
+                   completion);
 }
 
 - (void)updateCurrentKeyboardFrame:(CGRect)currentKeyboardFrame
@@ -216,23 +260,36 @@ BOOL UIEdgeInsetsEqualToEdgeInsetsWithThreshold(UIEdgeInsets lhs, UIEdgeInsets r
     NSInteger curve = [[notification userInfo][UIKeyboardAnimationCurveUserInfoKey] integerValue];
     
     __auto_type animations = ^{
+        self.alpha = 0.98; // This one helps to get complaetion block fired at expectd time;
         [self layoutSubviewsDependingCurrentKeyboardHeight];
+    };
+    
+    UIScrollView *nestedScrollView = [self _nestedWKWebViewScrollView];
+    nestedScrollView.akav_keyboardAdjustmentsBlocked = YES;
+    
+    __auto_type completion = ^{
+        nestedScrollView.akav_keyboardAdjustmentsBlocked = NO;
     };
     
     UIViewAnimationOptions options = (curve << 16);
     options |= UIViewAnimationOptionBeginFromCurrentState;
     options |= UIViewAnimationOptionLayoutSubviews;
     
-    UIScrollView *nestedScrollView = [self _nestedWKWebViewScrollView];
-    nestedScrollView.akav_isContentOffsetBlocked = YES;
+    if (isAnimationsDisabled()) {
+        [UIView performWithoutAnimation:animations];
+        dispatch_async(dispatch_get_main_queue(), completion);
+        return;
+    }
     
     [UIView animateWithDuration:duration
                           delay:0
                         options:options
                      animations:animations
-                     completion:^(BOOL finished __unused) {
-        nestedScrollView.akav_isContentOffsetBlocked = NO;
-    }];
+                     completion:nil];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(duration * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(),
+                   completion);
 }
 
 #pragma mark - Observers
@@ -351,7 +408,7 @@ BOOL UIEdgeInsetsEqualToEdgeInsetsWithThreshold(UIEdgeInsets lhs, UIEdgeInsets r
 }
 
 - (id<CAAction> _Nullable)_action:(void(^)(CABasicAnimation * _Nullable))animation {
-    if ([CATransaction disableActions]) {
+    if ([CATransaction disableActions] || isAnimationsDisabled()) {
         return nil;
     }
     
