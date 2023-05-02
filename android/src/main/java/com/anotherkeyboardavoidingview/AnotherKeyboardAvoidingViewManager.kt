@@ -17,6 +17,10 @@ class AnotherKeyboardAvoidingViewManager :
     return NAME
   }
 
+  public override fun setEnabled(view: AnotherKeyboardAvoidingView, value: Boolean) {
+    // do nothing
+  } 
+
   public override fun createViewInstance(
       context: ThemedReactContext
   ): AnotherKeyboardAvoidingView {
